@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../../models/User");
 const { SECRET_KEY, SALT } = require("../../config");
 const { UserInputError } = require("apollo-server");
+const { validator } = require("../../utils/validator");
 // validate input
 // hash the password and create auth token
 // make sure user doesnot already exist
@@ -19,6 +20,12 @@ module.exports = {
       if (user) {
         throw new UserInputError("Username is already taken", {
           error: "Uername is already taken",
+        });
+      }
+      const error = validator(username, password, email, confirmPassword);
+      if (error) {
+        throw new UserInputError(error.message, {
+          error: error.message,
         });
       }
       const hashedPassword = await bcrypt.hash(password, SALT);
